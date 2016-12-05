@@ -1,7 +1,7 @@
 #include "connection.h"
 
 
-int open_clientfd(char* hostname,int port){
+int open_clientfd(char* hostname, int port) {
     //first create value for using(e,g file descriptor and IP address)
     int clientfd;
 
@@ -35,11 +35,11 @@ int open_clientfd(char* hostname,int port){
 
     struct sockaddr_in serveraddr;
     //clear all in sockaddr_in
-    memset((char*)&serveraddr,0,sizeof(serveraddr));
+    memset((char*)&serveraddr, 0, sizeof(serveraddr));
 
     //get file descriptor of socket(default is client)
-    clientfd = socket(AF_INET,SOCK_STREAM,0);
-    if(clientfd < 0){
+    clientfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientfd < 0) {
         return -1;
     }
 
@@ -52,7 +52,7 @@ int open_clientfd(char* hostname,int port){
     hp = gethostbyname(hostname);
 
     //check hp if it is NULL
-    if(hp == NULL){
+    if (hp == NULL) {
         return -2;
     }
 
@@ -69,7 +69,7 @@ int open_clientfd(char* hostname,int port){
     //client fd connects to server by IP
     //must convert SA type
     //return 0 when success otherwise return -1
-    if(connect(clientfd,(SA*)&serveraddr,sizeof(serveraddr)) < 0){
+    if (connect(clientfd, (SA*)&serveraddr, sizeof(serveraddr)) < 0) {
         return -1;
     }
 
@@ -82,7 +82,7 @@ int open_clientfd(char* hostname,int port){
 server listen some port that is binded
 
 */
-int open_listenfd(int port){
+int open_listenfd(int port) {
 
     /*
     create a socket (due to it is client socket by default,
@@ -94,16 +94,16 @@ int open_listenfd(int port){
 
     //now it is just client by default,then call listen
     //function convert it
-    serverfd = socket(AF_INET,SOCK_STREAM,0);
+    serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
     //return -1 when creating socket failed
-    if(serverfd < 0){
+    if (serverfd < 0) {
         return -1;
     }
 
     //create serveraddr,clear all and set value like before
 
-    memset((char*)&serveraddr,0,sizeof(serveraddr));
+    memset((char*)&serveraddr, 0, sizeof(serveraddr));
 
     serveraddr.sin_port = htons(port);
     serveraddr.sin_family = AF_INET;
@@ -111,14 +111,14 @@ int open_listenfd(int port){
 
     //bind server IP address and port
     //return -1 when failed
-    if(bind(serverfd,(SA*)&serveraddr,sizeof(serveraddr)) < 0){
+    if (bind(serverfd, (SA*)&serveraddr, sizeof(serveraddr)) < 0) {
         return -1;
     }
 
     //convert client to server and be ready
     //to accept connection requests
     //can compare it with connect when fd is client socket
-    if(listen(serverfd,LISTENQ) < 0){
+    if (listen(serverfd, LISTENQ) < 0) {
         return -1;
     }
 
@@ -127,9 +127,9 @@ int open_listenfd(int port){
 
 }
 
-void error(char *s){
+void error(char *s) {
 
-    fprintf(stderr,"%s\n",s);
+    fprintf(stderr, "%s\n", s);
     exit(0);
 }
 
@@ -137,11 +137,11 @@ void error(char *s){
 
 // no buffer(read data from file to memorry directly)
 
-//note ssize_t means for signed int while size_t means for 
-//unsigned int 
+//note ssize_t means for signed int while size_t means for
+//unsigned int
 
 //wraped read function
-ssize_t rio_readn(int fd,char *usrbuf,size_t n){
+ssize_t rio_readn(int fd, char *usrbuf, size_t n) {
 
     //left bytes to read
     size_t nleft = n;
@@ -153,23 +153,23 @@ ssize_t rio_readn(int fd,char *usrbuf,size_t n){
 
     //restart read function when be interrupted
     //by sig handler return
-    while(nleft > 0){
+    while (nleft > 0) {
 
-        if((nread = read(fd,bufp,nleft)) < 0){
+        if ((nread = read(fd, bufp, nleft)) < 0) {
             //if it is interrupted
-            if(errno == EINTR){
+            if (errno == EINTR) {
                 //reset 0 and read again later
                 nread = 0;
-            }else{
+            } else {
                 //error
                 return -1;
             }
-        }else if(nread == 0){
+        } else if (nread == 0) {
             break;//break the loop when EOF
         }
         //less the nleft
         nleft -= nread;
-        
+
         //foward the bufp
         bufp += nread;
 
@@ -179,17 +179,17 @@ ssize_t rio_readn(int fd,char *usrbuf,size_t n){
 
 //wraped write function
 
-ssize_t rio_writen(int fd,char *usrbuf,size_t n){
+ssize_t rio_writen(int fd, char *usrbuf, size_t n) {
 
     size_t nleft = n;
     ssize_t nwritten;
     char *bufp = usrbuf;
 
-    while(nleft > 0){
-        if((nwritten == write(fd,bufp,nleft))<0){
-            if(errno == EINTR){
+    while (nleft > 0) {
+        if ((nwritten == write(fd, bufp, nleft)) < 0) {
+            if (errno == EINTR) {
                 nwritten = 0;
-            }else{
+            } else {
                 return -1;
             }
         }
@@ -209,7 +209,7 @@ rio_t is a struction for reading data from buffer
 
 
 //initiate rio_t by using fd
-void rio_readinitb(rio_t *rp,int fd){
+void rio_readinitb(rio_t *rp, int fd) {
 
     rp->rio_fd = fd;
 
@@ -226,53 +226,53 @@ void rio_readinitb(rio_t *rp,int fd){
 /*
 the rio_read can just read the number of RIOBUFSIZE bytes
 And it can read at many times
-functions of rio_read() is the same as those of read() 
+functions of rio_read() is the same as those of read()
 */
-static ssize_t rio_read(rio_t *rp,char *usrbuf,size_t n){
+static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n) {
     int cnt;
 
-    //when rp->rio_cnt = 0 ,refill the internal buffer by 
+    //when rp->rio_cnt = 0 ,refill the internal buffer by
     //getting data from fd
 
     //1.when none for reading from internal buffer
     //2.when interrupted by signal handler rio_cnt = -1
-    while(rp->rio_cnt <=0){
+    while (rp->rio_cnt <= 0) {
 
         /*
         read from fd to internal buffer
         */
         //return the number of bytes read successfully
-        rp->rio_cnt = read(rp->rio_fd,rp->rio_buf,RIOBUFSIZE);
+        rp->rio_cnt = read(rp->rio_fd, rp->rio_buf, RIOBUFSIZE);
 
-        if(rp->rio_cnt < 0){
-            if(errno !=EINTR){
+        if (rp->rio_cnt < 0) {
+            if (errno != EINTR) {
                 //error and cannot recover
                 return -1;
             }
-        }else if(rp->rio_cnt ==0){
+        } else if (rp->rio_cnt == 0) {
             //EOF
             return 0;
-        }else{
+        } else {
             //reset bufptr and read buffer from the start position
             rp->rio_bufptr = rp->rio_buf;
         }
     }
-            /*
-            read(copy) from buffer to usrbuf
-        */
+    /*
+    read(copy) from buffer to usrbuf
+    */
 
-        //min(n,rp->rio_cnt)
-        cnt = n;
-        if(cnt>rp->rio_cnt){
-            cnt = rp->rio_cnt;
-        }
+    //min(n,rp->rio_cnt)
+    cnt = n;
+    if (cnt > rp->rio_cnt) {
+        cnt = rp->rio_cnt;
+    }
 
-        memcpy(usrbuf,rp->rio_bufptr,cnt);
+    memcpy(usrbuf, rp->rio_bufptr, cnt);
 
-        //inc the bufptr
-        rp->rio_bufptr +=cnt;
-        rp->rio_cnt -=cnt;
-        return cnt; 
+    //inc the bufptr
+    rp->rio_bufptr += cnt;
+    rp->rio_cnt -= cnt;
+    return cnt;
 
 }
 
@@ -280,8 +280,8 @@ static ssize_t rio_read(rio_t *rp,char *usrbuf,size_t n){
 rio_readnb is like as rio_readn other than using rio_read
 */
 
-ssize_t rio_readnb(rio_t *rp,char *usrbuf,size_t n){
-        //left bytes to read
+ssize_t rio_readnb(rio_t *rp, char *usrbuf, size_t n) {
+    //left bytes to read
     size_t nleft = n;
 
     //the number of bytes read at one time
@@ -291,23 +291,23 @@ ssize_t rio_readnb(rio_t *rp,char *usrbuf,size_t n){
 
     //restart read function when be interrupted
     //by sig handler return
-    while(nleft > 0){
+    while (nleft > 0) {
 
-        if((nread = rio_read(rp,bufp,nleft)) < 0){
+        if ((nread = rio_read(rp, bufp, nleft)) < 0) {
             //if it is interrupted
-            if(errno == EINTR){
+            if (errno == EINTR) {
                 //reset 0 and read again later
                 nread = 0;
-            }else{
+            } else {
                 //error
                 return -1;
             }
-        }else if(nread == 0){
+        } else if (nread == 0) {
             break;//break the loop when EOF
         }
         //less the nleft
         nleft -= nread;
-        
+
         //foward the bufp
         bufp += nread;
 
@@ -315,5 +315,22 @@ ssize_t rio_readnb(rio_t *rp,char *usrbuf,size_t n){
     return (n - nleft);
 }
 
+
+//forbiding using %s format to read or write in socket programming
+
+ssize_t PrintToScreen(char *buf, size_t n) {
+    //STDOUT_FILENO is stdin's file descriptor
+    ssize_t num_write = write(STDOUT_FILENO, buf, n);
+    if (num_write <= 0) {
+        error("print to screen error");
+    }
+    return num_write;
+}
+
+//str should be a string
+int StringSizeByBytes(const char *str) {
+    int string_size_bybytes = strlen(str) + 1;
+    return  string_size_bybytes;
+}
 
 

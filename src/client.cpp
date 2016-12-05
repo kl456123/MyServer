@@ -1,6 +1,7 @@
 #include "connection.h"
 
-int main(int argc,char **argv){
+//note: every strings must be followed '\0'
+int main(int argc, char **argv) {
 	int clientfd;
 	int port;
 	char buf[50];
@@ -10,8 +11,8 @@ int main(int argc,char **argv){
 
 	// check legal input
 	// exit when argc is not three
-	if(argc != 3){
-		fprintf(stderr,"usage: %s <host> <port>\n",argv[0]);
+	if (argc != 3) {
+		fprintf(stderr, "usage: %s <host> <port>\n", argv[0]);
 		exit(0);
 	}
 
@@ -26,31 +27,43 @@ int main(int argc,char **argv){
 	port = atoi(argv[2]);
 
 	//create client socket for requesting
-	clientfd = open_clientfd(host,port);
+	clientfd = open_clientfd(host, port);
+	int iMode = 0;
+	ioctl(clientfd, FIONBIO, &iMode);
 
-	if(clientfd < 0){
+	if (clientfd < 0) {
 		error("open_clientfd error");
 	}
 
 	// rio_readinitb(&rio,clientfd);
-/*
-	read buf from stdin and send it to server ,
-	get data back to client and display it
-	exit when types ctrl-d
-*/
-	char recbuf[MAXSIZE]={0};
-
-	while(~scanf("%s",buf)){
-		// scanf("%s",buf);
+	/*
+		read buf from stdin and send it to server ,
+		get data back to client and display it
+		exit when types ctrl-d
+	*/
+	int n;
+	char recbuf[MAXSIZE] = {0};
+	while (~scanf("%s", buf)) {
 
 		//bug fixed pass '\0'
-		write(clientfd,buf,strlen(buf)+1);
-		
-		read(clientfd,recbuf,MAXSIZE);
-		fputs(recbuf,stdout);
-		fputs("\n",stdout);
+		//problem here
+		write(clientfd, buf, strlen(buf) + 1);
+		write(clientfd, "client", 7);
+
+		n = read(clientfd, recbuf, MAXSIZE);
+		if (n <= 0) {
+			printf("error\n");
+			return -1;
+		}
+
+		printf("recbuf size: %d\n", n);
+
+		//no %s
+		write(STDOUT_FILENO, recbuf, n);
+
+		fputs("\n", stdout);
 	}
-	
+
 
 
 	// while(fgets(buf,MAXSIZE,stdin) != NULL){
@@ -69,7 +82,7 @@ int main(int argc,char **argv){
 	// close flle descriptor of client
 	int rc = close(clientfd);
 
-	if(rc < 0){
+	if (rc < 0) {
 		error("close error");
 	}
 	exit(0);
