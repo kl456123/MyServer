@@ -25,7 +25,7 @@ void echo(int connfd) {
 		PrintToScreen(buf, n);
 		PrintToScreen("\n", StringSizeByBytes("\n"));
 
-		printf("ret len: %d\n", strlen(ret));
+		printf("ret len: %d\n", int(strlen(ret)));
 		PrintToScreen("ret str: ", StringSizeByBytes("ret str: "));
 
 		PrintToScreen(ret, ret_bytes_length);

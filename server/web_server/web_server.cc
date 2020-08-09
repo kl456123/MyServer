@@ -1,4 +1,5 @@
-#include "web_server.h"
+#include "server/web_server/web_server.h"
+#include "server/core/config_parser.h"
 
 
 
@@ -6,6 +7,7 @@
 int ParseUri(char *uri, char *filename, char *cgi_args) {
 
 	char *ptr;
+    auto server_config = GetGlobalConfig();
 
 	if (!strstr(uri, "?")) {
 		//static content
@@ -19,7 +21,8 @@ int ParseUri(char *uri, char *filename, char *cgi_args) {
 		default main page: "index.html"
 		*/
 		if (uri[strlen(uri) - 1] == '/')
-			strcat(filename, "index.html");
+			strcat(filename, server_config->public_dir);
+            strcat(filename, "/index.html");
 		return 1;
 
 	} else {
@@ -37,7 +40,8 @@ int ParseUri(char *uri, char *filename, char *cgi_args) {
 		}
 
 		//filename of cgi
-		strcpy(filename, ".");
+		// strcpy(filename, ".");
+        strcpy(filename, server_config->cgi_dir);
 		strcat(filename, uri);
 		return 0;
 	}
@@ -80,7 +84,7 @@ void ServeStatic(int file_descriptor, char *filename, int filesize) {
 
 
 //determinate file type
-void GetFileType(char *filename, char *file_type) {
+void GetFileType(const char *filename, char *file_type) {
 	if (strstr(filename, ".html")) {
 		strcpy(file_type, "text/html");
 	} else if (strstr(filename, ".gif")) {
@@ -117,8 +121,8 @@ void ServeDynamic(int file_descriptor, char *filename, char *cgi_args) {
 }
 
 //can handle it by redirecting to a static web page
-void HandleClientError(int file_descriptor, char *cause, char *err_num,
-                       char *short_msg, char *long_msg) {
+void HandleClientError(int file_descriptor, const char *cause, const char *err_num,
+                       const char *short_msg, const char *long_msg) {
 	char buf[MAXSIZE], body[MAXSIZE];
 
 	/*response body*/
@@ -135,7 +139,7 @@ void HandleClientError(int file_descriptor, char *cause, char *err_num,
 	//all are put in buf
 	sprintf(buf, "HTTP/1.0 %s %s\r\n", err_num, short_msg);
 	sprintf(buf, "%sContent-type: text/html\r\n", buf);
-	sprintf(buf, "%sContent-length: %d\r\n\r\n", buf, strlen(body));
+	sprintf(buf, "%sContent-length: %d\r\n\r\n", buf, int(strlen(body)));
 	sprintf(buf, "%s%s", buf, body);
 
 	write(file_descriptor, buf, strlen(buf));
@@ -196,7 +200,7 @@ void HandleRequest(int file_descriptor) {
 	//for test
 	// printf("method: %s\n", method);
 	// read(file_descriptor,MAXSI)
-	ReadRequest(file_descriptor);
+	// ReadRequest(file_descriptor);
 	//choose how to deal with it
 	is_static = ParseUri(uri, filename, cgi_args);
 

@@ -1,4 +1,4 @@
-#include "connection.h"
+#include "server/core/connection.h"
 
 
 int open_clientfd(char* hostname, int port) {
@@ -127,7 +127,7 @@ int open_listenfd(int port) {
 
 }
 
-void error(char *s) {
+void error(const char *s) {
 
     fprintf(stderr, "%s\n", s);
     exit(0);
@@ -318,7 +318,7 @@ ssize_t rio_readnb(rio_t *rp, char *usrbuf, size_t n) {
 
 //forbiding using %s format to read or write in socket programming
 
-ssize_t PrintToScreen(char *buf, size_t n) {
+ssize_t PrintToScreen(const char *buf, size_t n) {
     //STDOUT_FILENO is stdin's file descriptor
     ssize_t num_write = write(STDOUT_FILENO, buf, n);
     if (num_write <= 0) {

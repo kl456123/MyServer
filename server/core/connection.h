@@ -23,7 +23,7 @@ int open_clientfd(char* hostname, int port);
 
 int open_listenfd(int port);
 
-void error(char *msg);
+void error(const char *msg);
 
 struct rio_t {
 	//fd of rio version
@@ -53,7 +53,7 @@ ssize_t rio_writen(int fd, char *usrbuf, size_t n);
 ssize_t rio_readn(int fd, char *usrbuf, size_t n);
 
 
-ssize_t PrintToScreen(char *buf, size_t n);
+ssize_t PrintToScreen(const char *buf, size_t n);
 
 
 int StringSizeByBytes(const char *str);

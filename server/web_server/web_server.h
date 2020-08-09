@@ -1,7 +1,7 @@
 #ifndef WEB_SERVER_H_INCLUDED
 #define WEB_SERVER_H_INCLUDED
 
-#include "connection.h"
+#include "server/core/connection.h"
 #define FILESIZE 102400
 
 //utils function for common
@@ -22,8 +22,8 @@ void ServeStatic(int file_descriptor, char *filename, int filesize);
 void ServeDynamic(int file_descriptor, char *filename, char *cgi_args);
 
 //error handler
-void HandleClientError(int file_descriptor, char *cause, char *err_num,
-                       char *short_msg, char *long_msg);
+void HandleClientError(int file_descriptor, const char *cause, const char *err_num,
+                       const char *short_msg, const char *long_msg);
 
 
 //request handler
@@ -31,6 +31,6 @@ void HandleRequest(int file_descriptor);
 
 void ReadRequest(int file_descriptor);
 
-void GetFileType(char *filename, char *file_type);
+void GetFileType(const char *filename, char *file_type);
 
 #endif

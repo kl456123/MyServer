@@ -1,5 +1,5 @@
-#include "connection.h"
-#include "echo.h"
+#include "server/core/connection.h"
+#include "server/echo_server/echo.h"
 
 int main(int argc, char **argv) {
 	/*

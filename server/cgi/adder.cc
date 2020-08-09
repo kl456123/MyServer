@@ -1,4 +1,4 @@
-#include "connection.h"
+#include "server/core/connection.h"
 
 int main() {
 
@@ -30,7 +30,7 @@ int main() {
 
 
 	/*genernate HTTP response(other than some response header)*/
-	printf("Content-length: %d\r\n", strlen(content));
+	printf("Content-length: %d\r\n", int(strlen(content)));
 
 	//response header ends here
 	printf("Content-type: text/html\r\n\r\n");

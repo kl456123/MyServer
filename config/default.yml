@@ -1,0 +1,4 @@
+public_dir: ../public
+cgi_dir: ./
+log_dir: ./log
+log_level: 1

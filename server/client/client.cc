@@ -1,4 +1,4 @@
-#include "connection.h"
+#include "server/core/connection.h"
 
 //note: every strings must be followed '\0'
 int main(int argc, char **argv) {
